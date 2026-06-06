@@ -1,0 +1,24 @@
+# site.yml — Ansible Playbook
+---
+- name: Configure all servers
+  hosts: all
+  become: true   # Run as root
+  tasks:
+    - name: Update apt cache
+      apt: update_cache=yes
+
+    - name: Install Docker
+      apt: name=docker.io state=present
+
+    - name: Start Docker
+      service: name=docker state=started enabled=yes
+
+    - name: Install kubectl
+      shell: |
+        curl -LO https://dl.k8s.io/release/$(curl -sL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl
+        install kubectl /usr/local/bin/kubectl
+      args: { creates: /usr/local/bin/kubectl }
+
+    - name: Install Helm
+      shell: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      args: { creates: /usr/local/bin/helm }
